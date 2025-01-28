@@ -2,9 +2,9 @@ import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
 
-import Home from './pages/home.jsx'
-import RecipeViewer from './pages/recipeViewer.jsx'
-import RecipeCreator from './pages/recipeCreator.jsx'
+import Home from './pages/home'
+import RecipeViewer from './pages/recipeViewer'
+import RecipeCreator from './pages/recipeCreator'
 
 function App() {
 	return (
