@@ -25,15 +25,15 @@ function App() {
 function Header() {
   const tabs = [
     {path: "/", label: "Home"},
-    {path: "/recipe-creator", label: "Recipe Creator"},
-    {path: "/recipe-viewer", label: "Recipe Viewer"},
+    {path: "/recipe-creator", label: "Create"},
+    {path: "/recipe-viewer", label: "View"},
   ];
   const navigator = useNavigate();
   return (
     <>
       <header className="headerbar">
-        <h1 className="title">Eat<span className='titleHighlight'>y</span></h1>
         <nav className="navbar">
+          <h1 className="title">Eat<span className='titleHighlight'>y</span></h1>
           {tabs.map((item) => (
             <motion.li
               key={item.path}
