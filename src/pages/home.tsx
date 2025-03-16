@@ -3,10 +3,17 @@ import { useState, useEffect } from 'react';
 
 const items = [0, 1, 2, 3];
 
+const ANIM_TIME = 0.5; // time for base animations to complete
+const ANIM_STEP_TIME = 0.1; // added delay between each sequential loading dot
+const LOAD_ANIM_TIME = ANIM_TIME + 3 * ANIM_STEP_TIME; // total animation time for loading dots
+const ANIM_SPACING_TIME = 0.1; // spacing time added between animations;
+const MS = 1000; // s to ms conversion factor
+
 export default function Home() {
   const [reRoll, setReRoll] = useState(false);
   const [rollVisible, setRollVisible] = useState(false);
   const [resultVisible, setResultVisible] = useState(false);
+  const [resultName, setResultName] = useState("None");
 
   useEffect(() => {
     if (reRoll) {
@@ -15,16 +22,30 @@ export default function Home() {
         extra_delay = 0;
       }
       setResultVisible(false);
-      setTimeout(() => {
+
+      setTimeout(async () => { // pick random recipe from db
+        const ids = await window.database.getAllRecipeIds();
+        let name = "No Recipes";
+        if (ids.length > 0) {
+          const idx = Math.floor(Math.random() * (ids.length));
+          const recipe = await window.database.getRecipe(ids[idx].id);
+          name = recipe.name;
+        }
+        setResultName(name);
+      }, ANIM_TIME * MS * extra_delay);
+
+      setTimeout(() => { // initiate loading entrance animation after prev result is gone
         setRollVisible(true);
-      }, 600 * extra_delay);
-      setTimeout(() => {
+      }, ((ANIM_TIME + ANIM_SPACING_TIME) * MS) * extra_delay);
+
+      setTimeout(() => { // initiate loading exit animation after entrance animation is done
         setRollVisible(false);
-      }, 800 + 600 * extra_delay);
-      setTimeout(() => {
+      }, LOAD_ANIM_TIME * MS + ((ANIM_TIME + ANIM_SPACING_TIME) * MS) * extra_delay);
+
+      setTimeout(() => { // initiate new result animation once loading is done
         setReRoll(false);
         setResultVisible(true);
-      }, 1700 + 600 * extra_delay);
+      }, (LOAD_ANIM_TIME * 2 + ANIM_SPACING_TIME) * MS + ((ANIM_TIME + ANIM_SPACING_TIME) * MS) * extra_delay);
     }
   }, [reRoll]);
 
@@ -47,7 +68,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -50 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                transition={{ duration: ANIM_TIME, delay: index * ANIM_STEP_TIME }}
               />
             : null
           ))}
@@ -56,9 +77,9 @@ export default function Home() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: ANIM_TIME }}
           >
-            Tuscan Shrimp Marinara
+            {resultName}
           </motion.p> : null}
         </AnimatePresence>
       </ul>

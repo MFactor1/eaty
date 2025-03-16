@@ -41,6 +41,10 @@ app.on('ready', () => {
     });
   });
 
+  ipcMain.handle('getAllRecipeIds', (event) => {
+    return db.getAllRecipeIds();
+  });
+
   ipcMain.handle('getAllRecipes', (event) => {
     return db.getAllRecipes();
   });

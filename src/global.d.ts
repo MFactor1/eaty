@@ -9,6 +9,7 @@ declare global {
         instructions: string,
         calories: number
       ) => Promise<boolean>;
+      getAllRecipeIds: () => Promise<Pick<Recipe, "id">[]>;
       getAllRecipes: () => Promise<Recipe[]>;
       searchRecipes: (keyword: string) => Promise<Recipe[]>;
       getRecipe: (id: number) => Promise<Recipe>;

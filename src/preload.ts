@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('database', {
     instructions: string,
     calories: string
   ) => ipcRenderer.invoke('addRecipe', name, ingredients, instructions, calories),
+  getAllRecipeIds: () => ipcRenderer.invoke('getAllRecipeIds'),
   getAllRecipes: () => ipcRenderer.invoke('getAllRecipes'),
   searchRecipes: (keyword: string) => ipcRenderer.invoke('searchRecipes', keyword),
   getRecipe: (id: number) => ipcRenderer.invoke('getRecipe', id),

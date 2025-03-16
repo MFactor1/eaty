@@ -15,7 +15,7 @@ db.exec(`
 `);
 
 export interface Recipe {
-  id?: number;
+  id: number;
   name: string;
   ingredients: string;
   instructions: string;
@@ -36,6 +36,13 @@ export function addRecipe(recipe: Omit<Recipe, "id">): boolean {
       return false;
     }
   }
+}
+
+export function getAllRecipeIds(): Pick<Recipe, "id">[] {
+  const stmt: Statement = db.prepare(`
+    SELECT id FROM recipes
+  `);
+  return stmt.all() as Pick<Recipe, "id">[];
 }
 
 export function getAllRecipes(): Recipe[] {

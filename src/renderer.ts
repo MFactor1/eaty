@@ -29,8 +29,6 @@
 import './app.tsx';
 import './styles.css';
 
-console.log('👋 This message is being logged by "renderer.js", included via webpack');
-
 const addRecipe = async (name: string, ingredients: string, instructions: string, calories: number) => {
   await window.database.addRecipe(name, ingredients, instructions, calories);
 }
@@ -38,6 +36,7 @@ const addRecipe = async (name: string, ingredients: string, instructions: string
 const getAllRecipes = async () => {
   return await window.database.getAllRecipes();
 }
+/*
 addRecipe("test name", "test ingredients", "test instructions", 111);
 
 (async () => {
@@ -50,6 +49,7 @@ addRecipe("test name", "test ingredients", "test instructions", 111);
   const recipes_after = await getAllRecipes();
   console.log(`num remaining recipes: ${recipes_after.length}`);
 })();
+*/
 
 /*
 declare global {
