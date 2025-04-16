@@ -29,15 +29,9 @@
 import './app.tsx';
 import './styles.css';
 
-const addRecipe = async (name: string, ingredients: string, instructions: string, calories: number) => {
-  await window.database.addRecipe(name, ingredients, instructions, calories);
-}
-
 const getAllRecipes = async () => {
   return await window.database.getAllRecipes();
 }
-/*
-addRecipe("test name", "test ingredients", "test instructions", 111);
 
 (async () => {
   const recipes = await getAllRecipes();
@@ -49,27 +43,4 @@ addRecipe("test name", "test ingredients", "test instructions", 111);
   const recipes_after = await getAllRecipes();
   console.log(`num remaining recipes: ${recipes_after.length}`);
 })();
-*/
 
-/*
-declare global {
-  interface Window {
-    database: {
-      addRecipe: (recipe: {
-        name: string;
-        ingredients: string;
-        instructions: string;
-        calories: number;
-      }) => void;
-      getAllRecipes: () =>  { id: number; name: string; ingredients: string; instructions: string; calories: number }[]
-    };
-  }
-}
-
-window.database.addRecipe({
-  name: "test recipe",
-  ingredients: "test ingredients",
-  instructions: "test instructions",
-  calories: 111
-});
-*/

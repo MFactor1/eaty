@@ -52,7 +52,8 @@ function Header() {
                       //scale: 0.5,
                     }}
                     animate={{
-                      scale: 0.5,
+                      //width: 50,
+                      scale: 0.5
                     }}
                   />
                 </AnimatePresence>

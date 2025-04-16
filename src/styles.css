@@ -11,24 +11,33 @@
 	font-weight: soft;
 }
 
+:root {
+  --highlight-color: #02cf79;
+  --text-color: black;
+  --inverse-text-color: white;
+  --primary-color: #171717;
+  --seconday-color: #E6E6E6;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif;
   margin: auto;
   max-width: 38rem;
   padding: 0rem;
-  background-color: #0f1014;
+  /* background-color: #0f1014; */
+  background-color: #ffffff;
 }
 
 .title {
 	font-family: "Noto";
 	font-weight: 1000;
 	font-size: 60px;
-	color: #ffffff;
+	color: var(--text-color);
 }
 
 .titleHighlight {
-	color: #91ffda;
+	color: var(--highlight-color);
 }
 
 .navbar {
@@ -56,17 +65,18 @@ body {
 	flex: 1;
 	min-width: 20px;
 	user-select: none;
-	color: #ffffff;
+	color: var(--text-color);
 }
 
 .navUnderline {
-	height: 2px;
-	background: #91ffda;
+	height: 4px;
+	background: var(--text-color);
 	position: absolute;
 	left: 20px;
 	right: 20px;
 	bottom: 0;
 	margin-top: 5rem;
+	border: 0px;
 }
 
 .rollDisplay {
@@ -88,7 +98,7 @@ body {
 	height: 30px;
 	border-radius: 30px;
 	display: block;
-	background-color: #91ffda;
+	background-color: var(--text-color);
 	flex: 0 0 40px;
 }
 
@@ -96,20 +106,37 @@ body {
 	font-family: "Noto";
 	font-weight: 600;
 	font-size: 40px;
-	color: #ffffff;
+	color: var(--text-color);
 	margin-top: 0px;
 }
 
-.rollBtn {
+.primaryBtn {
     /*background-color: #91f2ff;*/
-    background-color: #91ffda;
-    border-radius: 10px;
+    background-color: var(--primary-color);
+    border-radius: 8px;
     padding: 10px 20px;
-    color: #0f1014;
+    color: var(--inverse-text-color);
 	font-family: "Noto";
 	font-weight: 500;
 	font-size: 20px;
 	width: 150px;
 	border: none;
+}
+
+.styled-input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid var(--seconday-color);
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s ease-in-out;
+  font-family: "Noto";
+  resize: none;
+  margin: 10px;
+}
+
+.styled-input:focus {
+  border-color: var(--primary-color);
 }
 

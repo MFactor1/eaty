@@ -8,33 +8,63 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS recipes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    ingredients TEXT NOT NULL,
     instructions TEXT NOT NULL,
     calories INTEGER NOT NULL
   );
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS ingredients (
+    name TEXT PRIMARY KEY
+  );
+`);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS recipeIngredients (
+    recipeId INTEGER NOT NULL,
+    ingredient TEXT NOT NULL,
+    quantity INTEGER,
+    unit TEXT,
+    PRIMARY KEY (recipeId, ingredient),
+    FOREIGN KEY (recipeId) REFERENCES recipes(id) ON DELETE CASCADE,
+    FOREIGN KEY (ingredient) REFERENCES ingredients(name) ON DELETE CASCADE
+  );
+`);
+
+export interface Ingredient {
+  name: string;
+  quantity?: number;
+  unit?: string;
+}
+
 export interface Recipe {
   id: number;
   name: string;
-  ingredients: string;
+  ingredients: Ingredient[],
   instructions: string;
   calories: number;
 }
 
-export function addRecipe(recipe: Omit<Recipe, "id">): boolean {
+export function addRecipe(recipe: Omit<Recipe, "id" | "ingredients">): Pick<Recipe, "id"> | null {
   try {
-    const stmt: Statement<[string, string, string, number]> = db.prepare(`
-      INSERT INTO recipes (name, ingredients, instructions, calories)
-      VALUES (?, ?, ?, ?)
+    const stmt: Statement<[string, string, number]> = db.prepare(`
+      INSERT INTO recipes (name, instructions, calories)
+      VALUES (?, ?, ?)
     `);
-    stmt.run(recipe.name, recipe.ingredients, recipe.instructions, recipe.calories);
-    return true;
+    const result = stmt.run(recipe.name, recipe.instructions, recipe.calories);
+
+    // Checking before BigInt conversion to number
+    if (result.lastInsertRowid > Number.MAX_SAFE_INTEGER) {
+      throw Error("Too many items in database");
+    } else {
+      return {id: Number(result.lastInsertRowid)}
+    }
+
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message);
-      return false;
+      console.error("Error while adding recipe: " + error.message);
     }
+    return null;
   }
 }
 
@@ -45,18 +75,18 @@ export function getAllRecipeIds(): Pick<Recipe, "id">[] {
   return stmt.all() as Pick<Recipe, "id">[];
 }
 
-export function getAllRecipes(): Recipe[] {
+export function queryAllRecipes(): Omit<Recipe, "ingredient">[] {
   const stmt: Statement = db.prepare(`
     SELECT * FROM recipes
   `);
-  return stmt.all() as Recipe[];
+  return stmt.all() as Omit<Recipe, "ingredient">[];
 }
 
-export function searchRecipes(keyword: string): Recipe[] {
+export function searchRecipes(keyword: string): Omit<Recipe, "ingredient">[] {
   const stmt: Statement<string> = db.prepare(`
     SELECT * FROM recipes WHERE name LIKE ?
   `);
-  return stmt.all(`%${keyword}%`) as Recipe[];
+  return stmt.all(`%${keyword}%`) as Omit<Recipe, "ingredient">[];
 }
 
 export function getRecipe(id: number): Recipe {
@@ -75,10 +105,59 @@ export function rmRecipe(id: number): boolean {
     return true;
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message);
-      return false;
+      console.error("Error while removing recipe: " + error.message);
     }
+    return false;
   }
 }
 
-export default db;
+export function addIngredient(name: string): boolean {
+  try {
+    const stmt: Statement<string> = db.prepare(`
+      INSERT or IGNORE INTO ingredients (name)
+      VALUES (?)
+    `);
+    stmt.run(name);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error while adding ingredient: " + error.message);
+    }
+    return false;
+  }
+}
+
+export function getAllIngredients(): Ingredient[] {
+  const stmt: Statement = db.prepare(`
+    SELECT * FROM ingredients
+  `);
+  return stmt.all() as Ingredient[];
+}
+
+export function addRecipeIngredient(recipeId: number, ingredient: Ingredient) {
+  try {
+    const stmt: Statement<[number, string, number, string]> = db.prepare(`
+      INSERT INTO recipeIngredients (recipeId, ingredient, quantity, unit)
+      VALUES (?, ?, ?, ?)
+    `);
+    stmt.run(
+      recipeId,
+      ingredient.name,
+      "quantity" in ingredient ? ingredient.quantity : null,
+      "unit" in ingredient ? ingredient.unit : null,
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error while adding recipe ingredient: " + error.message);
+    }
+    return false;
+  }
+}
+
+export function getRecipeIngredients(recipeId: number): Ingredient[] {
+  const stmt: Statement<number> = db.prepare(`
+    SELECT ingredient, quantity, unit FROM recipeIngredients
+    WHERE recipeId = ?
+  `);
+  return stmt.all(recipeId) as Ingredient[];
+}
+

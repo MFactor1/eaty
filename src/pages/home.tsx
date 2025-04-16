@@ -24,11 +24,10 @@ export default function Home() {
       setResultVisible(false);
 
       setTimeout(async () => { // pick random recipe from db
-        const ids = await window.database.getAllRecipeIds();
+        const recipe = await window.database.getRandRecipe();
         let name = "No Recipes";
-        if (ids.length > 0) {
-          const idx = Math.floor(Math.random() * (ids.length));
-          const recipe = await window.database.getRecipe(ids[idx].id);
+        console.log(recipe);
+        if (recipe) {
           name = recipe.name;
         }
         setResultName(name);
@@ -52,7 +51,7 @@ export default function Home() {
   return (
     <div style={{ marginTop: "30px" }}>
       <motion.button
-        className='rollBtn'
+        className='primaryBtn'
         onClick={() => reRoll ? null : setReRoll(true)}
         whileTap={{ y: 1 }}
       >
