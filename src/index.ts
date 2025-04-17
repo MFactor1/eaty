@@ -76,6 +76,8 @@ app.on('ready', () => {
     return recipeHandler.getRandRecipe();
   });
 
+  setTimeout(recipeHandler.initializeRecipeIds, 1000);
+
   createWindow();
 });
 

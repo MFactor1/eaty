@@ -3,9 +3,8 @@ import * as db from './db'
 
 var recipeIds: Pick<Recipe, "id">[];
 recipeIds = [];
-setTimeout(initializeRecipeIds, 2000)
 
-function initializeRecipeIds() {
+export function initializeRecipeIds() {
   console.log("Initializing recipe ids");
   recipeIds = db.getAllRecipeIds();
 }

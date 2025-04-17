@@ -1,35 +1,45 @@
 import Database, { Database as SQLiteDatabase, Statement,  } from 'better-sqlite3';
 import path from 'path';
 
-const dbPath: string = path.resolve(__dirname, '../../db/recipes.db');
-const db: SQLiteDatabase = new Database(dbPath, { verbose: console.log });
+let _db: SQLiteDatabase | null = null;
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS recipes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    instructions TEXT NOT NULL,
-    calories INTEGER NOT NULL
-  );
-`);
+function getDb() {
+  if (!_db) {
+    const dbPath: string = path.resolve(__dirname, '../../db/recipes.db');
+    _db = new Database(dbPath, { verbose: console.log });
+    initTables(_db);
+  }
+  return _db;
+}
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS ingredients (
-    name TEXT PRIMARY KEY
-  );
-`);
+function initTables(db: SQLiteDatabase) {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS recipes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      instructions TEXT NOT NULL,
+      calories INTEGER NOT NULL
+    );
+  `);
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS recipeIngredients (
-    recipeId INTEGER NOT NULL,
-    ingredient TEXT NOT NULL,
-    quantity INTEGER,
-    unit TEXT,
-    PRIMARY KEY (recipeId, ingredient),
-    FOREIGN KEY (recipeId) REFERENCES recipes(id) ON DELETE CASCADE,
-    FOREIGN KEY (ingredient) REFERENCES ingredients(name) ON DELETE CASCADE
-  );
-`);
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS ingredients (
+      name TEXT PRIMARY KEY
+    );
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS recipeIngredients (
+      recipeId INTEGER NOT NULL,
+      ingredient TEXT NOT NULL,
+      quantity INTEGER,
+      unit TEXT,
+      PRIMARY KEY (recipeId, ingredient),
+      FOREIGN KEY (recipeId) REFERENCES recipes(id) ON DELETE CASCADE,
+      FOREIGN KEY (ingredient) REFERENCES ingredients(name) ON DELETE CASCADE
+    );
+  `);
+}
 
 export interface Ingredient {
   name: string;
@@ -47,7 +57,7 @@ export interface Recipe {
 
 export function addRecipe(recipe: Omit<Recipe, "id" | "ingredients">): Pick<Recipe, "id"> | null {
   try {
-    const stmt: Statement<[string, string, number]> = db.prepare(`
+    const stmt: Statement<[string, string, number]> = getDb().prepare(`
       INSERT INTO recipes (name, instructions, calories)
       VALUES (?, ?, ?)
     `);
@@ -69,28 +79,28 @@ export function addRecipe(recipe: Omit<Recipe, "id" | "ingredients">): Pick<Reci
 }
 
 export function getAllRecipeIds(): Pick<Recipe, "id">[] {
-  const stmt: Statement = db.prepare(`
+  const stmt: Statement = getDb().prepare(`
     SELECT id FROM recipes
   `);
   return stmt.all() as Pick<Recipe, "id">[];
 }
 
 export function queryAllRecipes(): Omit<Recipe, "ingredient">[] {
-  const stmt: Statement = db.prepare(`
+  const stmt: Statement = getDb().prepare(`
     SELECT * FROM recipes
   `);
   return stmt.all() as Omit<Recipe, "ingredient">[];
 }
 
 export function searchRecipes(keyword: string): Omit<Recipe, "ingredient">[] {
-  const stmt: Statement<string> = db.prepare(`
+  const stmt: Statement<string> = getDb().prepare(`
     SELECT * FROM recipes WHERE name LIKE ?
   `);
   return stmt.all(`%${keyword}%`) as Omit<Recipe, "ingredient">[];
 }
 
 export function getRecipe(id: number): Recipe {
-  const stmt: Statement<number> = db.prepare(`
+  const stmt: Statement<number> = getDb().prepare(`
     SELECT * FROM recipes WHERE id = ?
   `);
   return stmt.get(id) as Recipe;
@@ -98,7 +108,7 @@ export function getRecipe(id: number): Recipe {
 
 export function rmRecipe(id: number): boolean {
   try {
-    const stmt: Statement<number> = db.prepare(`
+    const stmt: Statement<number> = getDb().prepare(`
       DELETE FROM recipes WHERE id = ?
     `);
     stmt.run(id);
@@ -113,7 +123,7 @@ export function rmRecipe(id: number): boolean {
 
 export function addIngredient(name: string): boolean {
   try {
-    const stmt: Statement<string> = db.prepare(`
+    const stmt: Statement<string> = getDb().prepare(`
       INSERT or IGNORE INTO ingredients (name)
       VALUES (?)
     `);
@@ -127,7 +137,7 @@ export function addIngredient(name: string): boolean {
 }
 
 export function getAllIngredients(): Ingredient[] {
-  const stmt: Statement = db.prepare(`
+  const stmt: Statement = getDb().prepare(`
     SELECT * FROM ingredients
   `);
   return stmt.all() as Ingredient[];
@@ -135,7 +145,7 @@ export function getAllIngredients(): Ingredient[] {
 
 export function addRecipeIngredient(recipeId: number, ingredient: Ingredient) {
   try {
-    const stmt: Statement<[number, string, number, string]> = db.prepare(`
+    const stmt: Statement<[number, string, number, string]> = getDb().prepare(`
       INSERT INTO recipeIngredients (recipeId, ingredient, quantity, unit)
       VALUES (?, ?, ?, ?)
     `);
@@ -154,7 +164,7 @@ export function addRecipeIngredient(recipeId: number, ingredient: Ingredient) {
 }
 
 export function getRecipeIngredients(recipeId: number): Ingredient[] {
-  const stmt: Statement<number> = db.prepare(`
+  const stmt: Statement<number> = getDb().prepare(`
     SELECT ingredient, quantity, unit FROM recipeIngredients
     WHERE recipeId = ?
   `);
