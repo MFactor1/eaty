@@ -60,7 +60,7 @@ export function createRecipe(
 }
 
 export function getAllRecipes(): Recipe[] {
-  const recipes: Omit<Recipe, "ingredient">[] = db.queryAllRecipes();
+  const recipes: Omit<Recipe, "ingredients">[] = db.queryAllRecipes();
   let recipes_complete: Recipe[] = [];
 
   for (let i = 0; i < recipes.length; i++) {

@@ -85,18 +85,18 @@ export function getAllRecipeIds(): Pick<Recipe, "id">[] {
   return stmt.all() as Pick<Recipe, "id">[];
 }
 
-export function queryAllRecipes(): Omit<Recipe, "ingredient">[] {
+export function queryAllRecipes(): Omit<Recipe, "ingredients">[] {
   const stmt: Statement = getDb().prepare(`
     SELECT * FROM recipes
   `);
-  return stmt.all() as Omit<Recipe, "ingredient">[];
+  return stmt.all() as Omit<Recipe, "ingredients">[];
 }
 
-export function searchRecipes(keyword: string): Omit<Recipe, "ingredient">[] {
+export function searchRecipes(keyword: string): Omit<Recipe, "ingredients">[] {
   const stmt: Statement<string> = getDb().prepare(`
     SELECT * FROM recipes WHERE name LIKE ?
   `);
-  return stmt.all(`%${keyword}%`) as Omit<Recipe, "ingredient">[];
+  return stmt.all(`%${keyword}%`) as Omit<Recipe, "ingredients">[];
 }
 
 export function getRecipe(id: number): Recipe {
